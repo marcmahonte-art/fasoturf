@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 100" fill="none" aria-hidden="true">
+  <!-- Tête de cheval stylisée (placeholder — logo définitif à fournir) -->
+  <path d="M14 56 C14 42 22 32 36 28 L52 24 L68 26 L80 30 L90 36 L94 46 L92 56 L86 60 L82 72 L74 84 L58 90 L44 86 L38 76 L42 66 L48 62 L38 60 L26 58 L18 55 Z" fill="#087F3E"/>
+  <!-- crinière (accent vert clair) -->
+  <path d="M80 30 L90 34 L88 44 L80 40 Z" fill="#0BAF58"/>
+  <!-- bande drapeau Burkina (rouge + jaune) -->
+  <rect x="14" y="54" width="74" height="6" fill="#D64545"/>
+  <rect x="14" y="60" width="74" height="2" fill="#F2C94C" opacity="0.85"/>
+  <!-- étoile jaune -->
+  <polygon points="78,6 80.2,11.5 86,11.8 81.3,15.3 83,21 78,17.6 73,21 74.7,15.3 70,11.8 75.8,11.5" fill="#F2C94C"/>
+  <!-- oeil -->
+  <circle cx="76" cy="40" r="2" fill="#001B16"/>
+</svg>
