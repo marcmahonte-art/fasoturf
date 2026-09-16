@@ -11,7 +11,9 @@ import sqlite3
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+if not (ROOT / "pmu-lonab-scraper").exists():
+    ROOT = Path(__file__).resolve().parents[1]
 MASTER_DB = ROOT / "pmu-lonab-scraper" / "data" / "master" / "pmu_master.db"
 OUT_JSON = ROOT / "fasoturf" / "src" / "data" / "realRaces.json"
 
@@ -119,13 +121,17 @@ def export_data(limit: int = 40):
     LEFT JOIN master_horse h ON h.horse_id = r.horse_id
     LEFT JOIN master_person pj ON pj.person_id = r.jockey_id
     LEFT JOIN master_person pt ON pt.person_id = r.trainer_id
-    JOIN market_runner_features m ON m.runner_id = r.runner_id
+    LEFT JOIN market_runner_features m ON m.runner_id = r.runner_id
     WHERE r.race_id = ?
     ORDER BY r.numero ASC
     """
 
     accents = ["green", "gold", "red"]
     output_races = []
+
+    # Suivi des numéros de réunion et course par date et hippodrome
+    reunion_map = {}
+    course_counters = {}
 
     for idx, rc in enumerate(races):
         rid = rc["race_id"]
@@ -137,28 +143,50 @@ def export_data(limit: int = 40):
         disc = clean_discipline(rc["discipline"], rc["titre"], hippo)
         title = clean_title(rc["titre"], hippo)
         distance = format_distance(rc["distance_m"])
+        race_date = rc["date"]
+
+        # Détermination cohérente de la Réunion et Course
+        if race_date not in reunion_map:
+            reunion_map[race_date] = {}
+            course_counters[race_date] = {}
+
+        if hippo not in reunion_map[race_date]:
+            r_num = len(reunion_map[race_date]) + 1
+            reunion_map[race_date][hippo] = f"R{r_num}"
+            course_counters[race_date][hippo] = 1
+        else:
+            course_counters[race_date][hippo] += 1
+
+        reunion_str = reunion_map[race_date][hippo]
+        course_str = f"C{course_counters[race_date][hippo]}"
 
         runners_list = []
         min_cote = 999.0
 
-        for row in runners_rows:
+        for r_idx, row in enumerate(runners_rows):
             cote = float(row["cote_decimale"]) if row["cote_decimale"] is not None else None
             if cote and cote < min_cote:
                 min_cote = cote
 
-            prob_pct = round(row["m_prob_norm"] * 100, 1) if row["m_prob_norm"] is not None else None
+            if row["m_prob_norm"] is not None:
+                prob_pct = round(row["m_prob_norm"] * 100, 1)
+            elif cote and cote > 0:
+                prob_pct = round((1.0 / cote) * 100, 1)
+            else:
+                prob_pct = 7.5
+
             mus = (row["performances_structured"] or "").replace('"', "").replace("[", "").replace("]", "")
 
             runners_list.append({
-                "number": row["numero"],
-                "name": (row["horse_name"] or f"Partant #{row['numero']}").title(),
+                "number": row["numero"] or (r_idx + 1),
+                "name": (row["horse_name"] or f"Partant #{row['numero'] or (r_idx + 1)}").title(),
                 "age": row["f_age"] if row["f_age"] is not None else (row["age_raw"] or 4),
                 "music": mus or "N/A",
                 "jockey": (row["jockey_name"] or "Non renseigné").title(),
                 "trainer": (row["trainer_name"] or "Non renseigné").title(),
                 "odds": cote if cote is not None else 10.0,
                 "marketProb": prob_pct,
-                "marketRank": row["m_rank"] or 99,
+                "marketRank": row["m_rank"] or (r_idx + 1),
                 "isWinner": bool(row["label_win"] == 1 or row["result_position"] == 1),
                 "position": row["result_position"] if row["result_position"] else None
             })
@@ -166,23 +194,21 @@ def export_data(limit: int = 40):
         # Trier les partants par numéro
         runners_list.sort(key=lambda x: (x["number"] or 999))
 
-        reunion_num = f"R{(idx % 5) + 1}"
-        course_num = f"C{((idx * 2) % 8) + 1}"
-
         has_result = any(r["isWinner"] for r in runners_list)
+        race_time = f"{13 + (idx % 6)}:{(idx * 35) % 60:02d}"
 
         output_races.append({
             "id": rid,
-            "date": rc["date"],
-            "reunion": reunion_num,
-            "course": course_num,
+            "date": race_date,
+            "reunion": reunion_str,
+            "course": course_str,
             "hippodrome": hippo,
             "title": title,
             "discipline": disc,
             "distance": distance,
             "terrain": "Bon" if (idx % 2 == 0) else "Souple",
             "starters": len(runners_list),
-            "time": f"{13 + (idx % 6)}:{(idx * 15) % 60:02d}",
+            "time": race_time,
             "status": "Arrivée validée" if has_result else "Départ imminent",
             "hasResult": has_result,
             "favoriteOdds": round(min_cote, 1) if min_cote < 999 else 3.5,

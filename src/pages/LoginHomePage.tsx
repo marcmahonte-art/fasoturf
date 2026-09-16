@@ -6,21 +6,32 @@ import { LoginCard } from "../components/landing/LoginCard";
 import { LatestRaces } from "../components/landing/LatestRaces";
 import { RaceDetailModal } from "../components/landing/RaceDetailModal";
 import { races as defaultRaces, type Race } from "../data/races";
-import { fetchRaces } from "../services/api";
+import { fetchRaces, fetchDates, type DateItem } from "../services/api";
 
 export function LoginHomePage() {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null);
   const [racesList, setRacesList] = useState<Race[]>(defaultRaces);
+  const [availableDates, setAvailableDates] = useState<DateItem[]>([]);
   const [isLive, setIsLive] = useState<boolean>(false);
 
   useEffect(() => {
     let mounted = true;
-    fetchRaces(30).then((result) => {
+
+    // Récupérer les courses (les plus récentes en premier, dont aujourd'hui)
+    fetchRaces(50).then((result) => {
       if (mounted && result.races.length > 0) {
         setRacesList(result.races);
         setIsLive(result.isLive);
       }
     });
+
+    // Récupérer les dates disponibles
+    fetchDates().then((dates) => {
+      if (mounted && dates.length > 0) {
+        setAvailableDates(dates);
+      }
+    });
+
     return () => {
       mounted = false;
     };
@@ -48,9 +59,11 @@ export function LoginHomePage() {
         </div>
       </main>
 
+      {/* Bandeau Programme officiel & Arrivées en direct */}
       <LatestRaces
         races={racesList}
         isLive={isLive}
+        availableDates={availableDates}
         onSelectRace={(race) => setSelectedRace(race)}
       />
 

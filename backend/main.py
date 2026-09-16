@@ -191,13 +191,16 @@ def get_races(
         LEFT JOIN master_horse h ON h.horse_id = r.horse_id
         LEFT JOIN master_person pj ON pj.person_id = r.jockey_id
         LEFT JOIN master_person pt ON pt.person_id = r.trainer_id
-        JOIN market_runner_features m ON m.runner_id = r.runner_id
+        LEFT JOIN market_runner_features m ON m.runner_id = r.runner_id
         WHERE r.race_id = ?
         ORDER BY r.numero ASC
         """
 
         accents = ["green", "gold", "red"]
         result = []
+
+        reunion_map = {}
+        course_counters = {}
 
         for idx, rc in enumerate(races_rows):
             rid = rc["race_id"]
@@ -209,46 +212,69 @@ def get_races(
             disc = clean_discipline(rc["discipline"], rc["titre"], hippo)
             title = clean_title(rc["titre"], hippo)
             distance = format_distance(rc["distance_m"])
+            race_date = rc["date"]
+
+            if race_date not in reunion_map:
+                reunion_map[race_date] = {}
+                course_counters[race_date] = {}
+
+            if hippo not in reunion_map[race_date]:
+                r_num = len(reunion_map[race_date]) + 1
+                reunion_map[race_date][hippo] = f"R{r_num}"
+                course_counters[race_date][hippo] = 1
+            else:
+                course_counters[race_date][hippo] += 1
+
+            reunion_str = reunion_map[race_date][hippo]
+            course_str = f"C{course_counters[race_date][hippo]}"
 
             runners_list = []
             min_cote = 999.0
 
-            for row in runners_rows:
+            for r_idx, row in enumerate(runners_rows):
                 cote = float(row["cote_decimale"]) if row["cote_decimale"] is not None else None
                 if cote and cote < min_cote:
                     min_cote = cote
 
-                prob_pct = round(row["m_prob_norm"] * 100, 1) if row["m_prob_norm"] is not None else None
+                if row["m_prob_norm"] is not None:
+                    prob_pct = round(row["m_prob_norm"] * 100, 1)
+                elif cote and cote > 0:
+                    prob_pct = round((1.0 / cote) * 100, 1)
+                else:
+                    prob_pct = 7.5
+
                 mus = (row["performances_structured"] or "").replace('"', "").replace("[", "").replace("]", "")
 
                 runners_list.append(RunnerOut(
-                    number=row["numero"] or 1,
-                    name=(row["horse_name"] or f"Partant #{row['numero']}").title(),
+                    number=row["numero"] or (r_idx + 1),
+                    name=(row["horse_name"] or f"Partant #{row['numero'] or (r_idx + 1)}").title(),
                     age=row["f_age"] if row["f_age"] is not None else (row["age_raw"] or 4),
                     music=mus or "N/A",
                     jockey=(row["jockey_name"] or "Non renseigné").title(),
                     trainer=(row["trainer_name"] or "Non renseigné").title(),
                     odds=cote if cote is not None else 10.0,
                     marketProb=prob_pct,
-                    marketRank=row["m_rank"] or 99,
+                    marketRank=row["m_rank"] or (r_idx + 1),
                     isWinner=bool(row["label_win"] == 1 or row["result_position"] == 1),
                     position=row["result_position"] if row["result_position"] else None
                 ))
 
+            runners_list.sort(key=lambda x: (x.number or 999))
             has_result = any(r.isWinner for r in runners_list)
+            race_time = f"{13 + (idx % 6)}:{(idx * 35) % 60:02d}"
 
             result.append(RaceOut(
                 id=rid,
-                date=rc["date"],
-                reunion=f"R{(idx % 5) + 1}",
-                course=f"C{((idx * 2) % 8) + 1}",
+                date=race_date,
+                reunion=reunion_str,
+                course=course_str,
                 hippodrome=hippo,
                 title=title,
                 discipline=disc,
                 distance=distance,
                 terrain="Bon" if (idx % 2 == 0) else "Souple",
                 starters=len(runners_list),
-                time=f"{13 + (idx % 6)}:{(idx * 15) % 60:02d}",
+                time=race_time,
                 status="Arrivée validée" if has_result else "Départ imminent",
                 hasResult=has_result,
                 favoriteOdds=round(min_cote, 1) if min_cote < 999 else 3.5,
@@ -262,14 +288,64 @@ def get_races(
 
 @app.get("/api/races/today", response_model=List[RaceOut])
 def get_today_races():
-    """Renvoie les courses de la journée la plus récente enregistrée dans la base."""
+    """Renvoie les courses du jour (ou de la journée la plus récente)."""
     conn = get_db_connection()
     try:
-        latest_date_row = conn.execute("SELECT MAX(date) AS max_date FROM master_race WHERE n_runners_linked >= 8").fetchone()
-        latest_date = latest_date_row["max_date"] if latest_date_row else None
-        if not latest_date:
+        import datetime
+        today_str = datetime.date.today().strftime("%Y-%m-%d")
+        # Vérifier d'abord s'il y a des courses pour aujourd'hui
+        count_today = conn.execute("SELECT count(*) FROM master_race WHERE date = ? AND n_runners_linked >= 8", (today_str,)).fetchone()[0]
+        if count_today > 0:
+            target_date = today_str
+        else:
+            latest_date_row = conn.execute("SELECT MAX(date) AS max_date FROM master_race WHERE n_runners_linked >= 8").fetchone()
+            target_date = latest_date_row["max_date"] if latest_date_row else None
+
+        if not target_date:
             return []
-        return get_races(limit=15, date=latest_date)
+        return get_races(limit=50, date=target_date)
+    finally:
+        conn.close()
+
+@app.get("/api/dates")
+def get_available_dates():
+    """Renvoie la liste des dates de courses disponibles avec leur libellé et nombre."""
+    conn = get_db_connection()
+    try:
+        import datetime
+        today_str = datetime.date.today().strftime("%Y-%m-%d")
+        rows = conn.execute("""
+            SELECT date, count(*) as count 
+            FROM master_race 
+            WHERE n_runners_linked >= 8 
+            GROUP BY date 
+            ORDER BY date DESC 
+            LIMIT 30
+        """).fetchall()
+
+        months_fr = {
+            "01": "Janv", "02": "Févr", "03": "Mars", "04": "Avr",
+            "05": "Mai", "06": "Juin", "07": "Juil", "08": "Août",
+            "09": "Sept", "10": "Oct", "11": "Nov", "12": "Déc"
+        }
+
+        dates_list = []
+        for r in rows:
+            d = r["date"]
+            is_today = (d == today_str)
+            parts = d.split("-")
+            if len(parts) == 3:
+                label = "Aujourd'hui" if is_today else f"{parts[2]} {months_fr.get(parts[1], parts[1])}"
+            else:
+                label = d
+
+            dates_list.append({
+                "date": d,
+                "label": label,
+                "count": r["count"],
+                "isToday": is_today
+            })
+        return dates_list
     finally:
         conn.close()
 

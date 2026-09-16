@@ -2,6 +2,25 @@ import { useEffect } from "react";
 import { X, MapPin, Calendar, Compass, Trophy, TrendingUp, User } from "lucide-react";
 import type { Race } from "../../data/races";
 
+const MONTHS_FULL: Record<string, string> = {
+  "01": "Janvier", "02": "Février", "03": "Mars", "04": "Avril",
+  "05": "Mai", "06": "Juin", "07": "Juil", "08": "Août",
+  "09": "Septembre", "10": "Octobre", "11": "Novembre", "12": "Décembre"
+};
+
+function formatFullDate(dateStr: string) {
+  if (!dateStr) return "Date officielle";
+  const isToday = dateStr === "2026-09-16" || dateStr === new Date().toISOString().split("T")[0];
+  const parts = dateStr.split("-");
+  if (parts.length === 3) {
+    const day = parseInt(parts[2], 10);
+    const month = MONTHS_FULL[parts[1]] || parts[1];
+    const base = `${day} ${month} ${parts[0]}`;
+    return isToday ? `Aujourd'hui · ${base}` : base;
+  }
+  return dateStr;
+}
+
 interface RaceDetailModalProps {
   race: Race | null;
   onClose: () => void;
@@ -63,20 +82,21 @@ export function RaceDetailModal({ race, onClose }: RaceDetailModalProps) {
             {race.title}
           </h2>
 
-          <div className="mt-3 flex flex-wrap items-center gap-y-2 gap-x-5 text-xs sm:text-sm text-white/70">
-            <span className="flex items-center gap-1.5 font-medium text-white/90">
-              <MapPin size={15} className="text-faso-gold" />
+          <div className="mt-3 flex flex-wrap items-center gap-2 sm:gap-3">
+            {/* DATE ULTRA VISIBLE */}
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400/25 border border-amber-400/60 px-3 py-1 text-xs sm:text-sm font-black text-amber-300 shadow-md">
+              <Calendar size={15} className="text-amber-400" />
+              {formatFullDate(race.date)} · {race.time}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1 text-xs sm:text-sm font-semibold text-white/95">
+              <MapPin size={14} className="text-faso-gold" />
               {race.hippodrome}
             </span>
-            <span className="flex items-center gap-1.5">
-              <Calendar size={14} />
-              {race.date} · {race.time}
-            </span>
-            <span className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1 text-xs sm:text-sm font-semibold text-white/80">
               <Compass size={14} />
               {race.distance} ({race.terrain})
             </span>
-            <span className="flex items-center gap-1.5 text-faso-accent font-semibold">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs sm:text-sm font-bold text-emerald-400">
               <TrendingUp size={14} />
               Favori : {race.favoriteOdds.toFixed(1)}/1
             </span>
