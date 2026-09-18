@@ -1,0 +1,249 @@
+[
+  {
+    "filename": "JH_PMUB_DU_01-07-2025.pdf",
+    "type": "JOURNAL",
+    "pages": 2,
+    "data": {
+      "date_publication": "2025-07-01",
+      "courses": [
+        {
+          "course_id": "JH_01-07-2025",
+          "date": "2025-07-01",
+          "reunion": "R1",
+          "course_num": "2",
+          "hippodrome": "VICHY NOCTURNE",
+          "discipline": "ATTELE",
+          "distance": "000 CFA",
+          "montant": "37 000 EUROS",
+          "partants": "13",
+          "type_course": "AUTOSTART",
+          "titre": "VICHY NOCTURNE - PRIX JEAN-MICHEL BAZIRE - ATTELE"
+        }
+      ],
+      "partants": []
+    }
+  },
+  {
+    "filename": "JH_PMUB_DU_02-12-2024.pdf",
+    "type": "JOURNAL",
+    "pages": 2,
+    "data": {
+      "date_publication": "1995-07-18",
+      "courses": [
+        {
+          "course_id": "JH_02-12-2024",
+          "date": "1995-07-18",
+          "reunion": "R1",
+          "course_num": 0,
+          "hippodrome": "PARIS-VINCENNES",
+          "discipline": "ATTELE",
+          "distance": "245 G",
+          "montant": "53 000 EUROS",
+          "partants": "16",
+          "type_course": "",
+          "titre": "PARIS-VINCENNES - PRIX LES MATHES-LA PALMYRE"
+        }
+      ],
+      "partants": [
+        {
+          "numero": 16,
+          "nom": "1 -",
+          "sexe": "1 -",
+          "age": "",
+          "driver": "TH. DUVALDESTIN",
+          "entraineur": "8 -",
+          "proprietaire": "J.M. BAZIRE",
+          "distance": "E. RAFFIN",
+          "performance": "",
+          "gains": "8 -",
+          "chrono": "",
+          "cote": null
+        },
+        {
+          "numero": 16,
+          "nom": "2 -",
+          "sexe": "2 -",
+          "age": "",
+          "driver": "",
+          "entraineur": "9 -",
+          "proprietaire": "M. SASSIER",
+          "distance": "",
+          "performance": "",
+          "gains": "9 -",
+          "chrono": "Y. LEBOURGEOIS",
+          "cote": null
+        },
+        {
+          "numero": 16,
+          "nom": "3 -",
+          "sexe": "3 -",
+          "age": "",
+          "driver": "",
+          "entraineur": "10 -",
+          "proprietaire": "M. MOTTIER",
+          "distance": "B. ROCHARD",
+          "performance": "",
+          "gains": "10 -",
+          "chrono": "",
+          "cote": null
+        },
+        {
+          "numero": 16,
+          "nom": "4 -",
+          "sexe": "4 -",
+          "age": "",
+          "driver": "",
+          "entraineur": "11 -",
+          "proprietaire": "C. THOMAIN",
+          "distance": "D. BEKAERT",
+          "performance": "",
+          "gains": "11 -",
+          "chrono": "",
+          "cote": null
+        },
+        {
+          "numero": 16,
+          "nom": "5 -",
+          "sexe": "5 -",
+          "age": "",
+          "driver": "",
+          "entraineur": "12 -",
+          "proprietaire": "A. CHAVATTE",
+          "distance": "M. ABRIVARD",
+          "performance": "",
+          "gains": "12 -",
+          "chrono": "",
+          "cote": null
+        },
+        {
+          "numero": 16,
+          "nom": "6 -",
+          "sexe": "6 -",
+          "age": "",
+          "driver": "",
+          "entraineur": "13 -",
+          "proprietaire": "",
+          "distance": "D. THOMAIN",
+          "performance": "",
+          "gains": "13 -",
+          "chrono": "",
+          "cote": null
+        },
+        {
+          "numero": 16,
+          "nom": "7 -",
+          "sexe": "7 -",
+          "age": "",
+          "driver": "",
+          "entraineur": "",
+          "proprietaire": "",
+          "distance": "P.Y. VERVA",
+          "performance": "",
+          "gains": "",
+          "chrono": "",
+          "cote": null
+        }
+      ]
+    }
+  },
+  {
+    "filename": "JH_PMUB_DU_06-09-2026.pdf",
+    "type": "JOURNAL",
+    "pages": 2,
+    "data": {
+      "date_publication": "2026-09-06",
+      "courses": [
+        {
+          "course_id": "JH_06-09-2026",
+          "date": "2026-09-06",
+          "reunion": "R1",
+          "course_num": "3",
+          "hippodrome": "PARISLONGCHAMP",
+          "discipline": "PLAT",
+          "distance": "84 G",
+          "montant": "50 900 EUROS",
+          "partants": "16",
+          "type_course": "handicap",
+          "titre": "PARISLONGCHAMP - QATAR PRIX DE LA REINE MARGUERITE PRESENTE PAR LE PARISIEN"
+        }
+      ],
+      "partants": []
+    }
+  },
+  {
+    "filename": "Res41_06_09_2026.pdf",
+    "type": "RESULTAT",
+    "pages": 1,
+    "data": {
+      "filename": "Res41_06_09_2026.pdf",
+      "date": "2026-09-06",
+      "type_pari": "4+1",
+      "arrivee": [
+        9,
+        2,
+        16,
+        12,
+        1
+      ],
+      "npo": 0,
+      "np": 0,
+      "gains_ordre": "\n",
+      "gains_desordre": "1341500\n\n48\n",
+      "gains_bonus": "53000\n\n925\n53448264\n",
+      "nb_gagnants_ordre": null,
+      "nb_gagnants_desordre": null,
+      "nb_gagnants_bonus": null,
+      "masse_partager": null
+    }
+  },
+  {
+    "filename": "Res_01_07_2025_QUARTE.pdf",
+    "type": "RESULTAT",
+    "pages": 1,
+    "data": {
+      "filename": "Res_01_07_2025_QUARTE.pdf",
+      "date": "2025-07-01",
+      "type_pari": "QUARTE",
+      "arrivee": [
+        1,
+        2,
+        8,
+        6
+      ],
+      "npo": 0,
+      "np": 0,
+      "gains_ordre": "719000\n\n82\n",
+      "gains_desordre": "11500\n\n7643\n",
+      "gains_bonus": null,
+      "nb_gagnants_ordre": null,
+      "nb_gagnants_desordre": null,
+      "nb_gagnants_bonus": null,
+      "masse_partager": null
+    }
+  },
+  {
+    "filename": "Res_02_12_2024_QUARTE.pdf",
+    "type": "RESULTAT",
+    "pages": 1,
+    "data": {
+      "filename": "Res_02_12_2024_QUARTE.pdf",
+      "date": "2024-12-02",
+      "type_pari": "QUARTE",
+      "arrivee": [
+        7,
+        16,
+        9,
+        15
+      ],
+      "npo": 0,
+      "np": 0,
+      "gains_ordre": "49000\n\n1080\n",
+      "gains_desordre": "2500\n\n29262\n",
+      "gains_bonus": null,
+      "nb_gagnants_ordre": null,
+      "nb_gagnants_desordre": null,
+      "nb_gagnants_bonus": null,
+      "masse_partager": null
+    }
+  }
+]

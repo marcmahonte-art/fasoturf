@@ -1,0 +1,18 @@
+# Dépendances du moteur — Hippo Engine
+#
+# IMPORTANT : le moteur fonctionne SANS aucune de ces dépendances.
+# Toutes les briques critiques (features, RANK, Plackett-Luce, value, fusion,
+# quinté, backtest, métriques) sont écrites en Python pur (stdlib uniquement).
+#
+# Ces paquets ne sont que des ACCÉLÉRATEURS / alternatives de backend :
+
+# Backend ML alternatif (HistGradientBoostingClassifier)
+scikit-learn>=1.3
+numpy>=1.26
+pandas>=2.1
+
+# Backend ML préféré quand disponible
+catboost>=1.2
+
+# Tests (remplaçable par ml/tests/run_tests.py si pip est indisponible)
+pytest>=8.0

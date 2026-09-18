@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+logs/
+*.log
+
+# Local config
+.env
+.env.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (large files)
+pmu-lonab-scraper/data/raw/
+pmu-lonab-scraper/data/backups/
+pmu-lonab-scraper/data/processed/*.db
+!pmu-lonab-scraper/data/processed/pmu_lonab.db
+pmu-lonab-scraper/data/quality/
+pmu-lonab-scraper/data/metadata/
+
+# Generated site
+site/index.html
+
+# Reports (generated)
+PHASE*_REPORT.md
+PHASE*_PLAN.md
+PHASE*_IDENTITY_MAP.md
+PHASE*_INTEGRITY.md
+PHASE*_GAPS.md
+PHASE*_RAW_INVENTORY.md
+PHASE*_ML_STATE.md
+PHASE*_DB_INVENTORY.md
+PHASE*_RECONCILIATION.md
+PHASE*_RELATIONS.md
+PHASE*_REVIEW_QUEUE.csv
+PHASE*_UNMATCHED_RAW.csv
+manifest_phase*.json
+
+# Test DBs
+test*.db
+
+# Cache
+pmu-lonab-scraper/data/cache/
+
+# Scripts output
+*.csv
+*.json
+!package.json
+!requirements.txt
+
+# Hippo engine
+hippo-engine/.venv/
