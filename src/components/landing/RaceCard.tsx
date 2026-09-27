@@ -1,7 +1,12 @@
-import { MapPin, Clock3, TrendingUp, Calendar, CheckCircle2 } from "lucide-react";
+import { MapPin, Clock3, TrendingUp, Calendar, CheckCircle2, Star } from "lucide-react";
 import horseRunner from "../../assets/horse-runner.svg";
 import type { Race } from "../../data/races";
+import { todayIso } from "../../lib/formatters";
 
+/**
+ * Accent graphique du petit cheval — seul point de couleur chaude toléré
+ * (détail graphique, cf. Design System §4 « règle 80 / 15 / 5 »).
+ */
 const ACCENT_COLOR: Record<Race["accent"], string> = {
   green: "#0BAF58",
   gold: "#F2C94C",
@@ -16,15 +21,15 @@ const MONTHS_FR: Record<string, string> = {
 
 function formatVisibleDate(dateStr: string): { label: string; isToday: boolean } {
   if (!dateStr) return { label: "Date N/A", isToday: false };
-  const isToday = dateStr === "2026-09-16" || dateStr === new Date().toISOString().split("T")[0];
+  // Comparaison à la date **locale** courante : `toISOString()` renvoie la date
+  // UTC et peut désigner la veille ou le lendemain selon le fuseau.
+  const isToday = dateStr.slice(0, 10) === todayIso();
   const parts = dateStr.split("-");
   if (parts.length === 3) {
     const day = parts[2];
     const month = MONTHS_FR[parts[1]] || parts[1];
-    if (isToday) {
-      return { label: `Aujourd'hui (${day} ${month})`, isToday: true };
-    }
-    return { label: `${day} ${month} ${parts[0]}`, isToday: false };
+    if (isToday) return { label: "Aujourd'hui", isToday: true };
+    return { label: `${day} ${month}`, isToday: false };
   }
   return { label: dateStr, isToday: false };
 }
@@ -32,12 +37,16 @@ function formatVisibleDate(dateStr: string): { label: string; isToday: boolean }
 export function RaceCard({
   race,
   onSelect,
+  showDate = false,
 }: {
   race: Race;
   onSelect?: (race: Race) => void;
+  /** N'affiche la date que dans la vue « Toutes » (dates mélangées). */
+  showDate?: boolean;
 }) {
   const accent = ACCENT_COLOR[race.accent];
   const dateInfo = formatVisibleDate(race.date);
+  const isToday = dateInfo.isToday;
 
   return (
     <article
@@ -50,32 +59,42 @@ export function RaceCard({
           onSelect?.(race);
         }
       }}
-      className={`group relative flex h-[134px] min-w-[265px] sm:min-w-[285px] flex-col justify-between rounded-xl border p-3.5 text-white transition-all duration-200 hover:scale-[1.02] hover:shadow-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-faso-gold/50 ${
-        dateInfo.isToday
-          ? "border-faso-gold/40 bg-[#063b2f]/90 hover:border-faso-gold hover:bg-[#094739]"
-          : "border-white/15 bg-[#06352B]/85 hover:border-faso-gold/40 hover:bg-[#084236]"
+      className={`group relative flex h-[132px] min-w-[262px] sm:min-w-[278px] flex-col justify-between rounded-[8px] border p-3.5 text-white transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-faso-accent/60 ${
+        isToday
+          ? "border-faso-accent/40 bg-[#07392E] hover:border-faso-accent/70"
+          : "border-white/10 bg-[#06352B]/85 hover:border-faso-accent/35 hover:bg-[#084236]"
       }`}
     >
-      {/* Ligne supérieure : Réunion/Course + Date très visible + Icône */}
+      {/* Ligne 1 : Réunion / Course + marquage LONAB (+ date en vue mixte) */}
       <div className="flex items-center justify-between gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <span className="rounded bg-faso-green/40 border border-faso-accent/40 px-1.5 py-0.5 text-[11px] font-extrabold text-faso-accent">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="rounded bg-faso-green/30 border border-faso-green/40 px-1.5 py-0.5 text-[11px] font-bold text-white">
             {race.reunion}
           </span>
-          <span className="rounded bg-white/10 px-1.5 py-0.5 text-[11px] font-bold text-white">
+          <span className="rounded bg-faso-green/20 px-1.5 py-0.5 text-[11px] font-bold text-white/90">
             {race.course}
           </span>
-          {/* BADGE DATE HAUTE VISIBILITÉ DIRECTEMENT SUR LA CARTE */}
-          <span
-            className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10.5px] font-black tracking-wide shadow-sm ${
-              dateInfo.isToday
-                ? "bg-amber-400 text-slate-950 font-black ring-1 ring-amber-300"
-                : "bg-white/15 text-amber-200 border border-amber-300/30"
-            }`}
-          >
-            <Calendar size={11} className={dateInfo.isToday ? "text-slate-950" : "text-amber-300"} />
-            {dateInfo.label}
-          </span>
+
+          {/* Marquage LONAB — unique emploi du doré, volontairement discret */}
+          {race.isLonab && (
+            <span
+              title={
+                `Course LONAB${race.lonabJournalBet ? ` — pari du jour : ${race.lonabJournalBet}` : ""}` +
+                `${race.lonabBet ? ` (${race.lonabBet})` : ""}`
+              }
+              className="inline-flex shrink-0 items-center gap-0.5 rounded border border-faso-gold/40 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-faso-gold/90"
+            >
+              <Star size={9} className="fill-faso-gold/70" />
+              LONAB
+            </span>
+          )}
+
+          {showDate && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-medium text-white/60">
+              <Calendar size={10} className="text-white/40" />
+              {dateInfo.label}
+            </span>
+          )}
         </div>
 
         <img
@@ -84,44 +103,44 @@ export function RaceCard({
           aria-hidden="true"
           width={24}
           height={17}
-          className="opacity-90 group-hover:scale-110 transition-transform"
+          className="shrink-0 opacity-80 transition-opacity group-hover:opacity-100"
           style={{ color: accent }}
         />
       </div>
 
-      {/* Corps : Hippodrome & Titre */}
-      <div className="flex flex-col my-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1 text-[13px] font-bold">
-            <MapPin size={13} strokeWidth={2.5} className="text-faso-gold shrink-0" />
-            <span className="truncate">{race.hippodrome}</span>
-          </div>
-          <span className="text-[10px] font-semibold text-white/70 bg-black/20 px-1.5 py-0.2 rounded border border-white/5">
-            {race.discipline}
-          </span>
+      {/* Ligne 2 : Hippodrome + discipline */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5 text-[13px] font-semibold">
+          <MapPin size={13} strokeWidth={2.5} className="shrink-0 text-white/45" />
+          <span className="truncate">{race.hippodrome}</span>
         </div>
-        <div className="truncate text-[11px] text-white/75 mt-0.5 font-medium">
-          {race.distance} · {race.title}
-        </div>
+        <span className="shrink-0 rounded bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-medium text-white/60">
+          {race.discipline}
+        </span>
       </div>
 
-      {/* Pied de carte : Favori + Partants + Heure & Statut */}
-      <div className="flex items-center justify-between text-[11px] text-white/75 pt-1.5 border-t border-white/10">
-        <span className="flex items-center gap-1 font-bold text-white">
+      {/* Ligne 3 : distance · libellé */}
+      <div className="truncate text-[11px] font-medium text-white/55">
+        {race.distance} · {race.title}
+      </div>
+
+      {/* Ligne 4 : favori + partants + heure */}
+      <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-1.5 text-[11px]">
+        <span className="flex items-center gap-1 font-semibold text-white/90">
           <TrendingUp size={11} className="text-faso-accent" />
           Fav. {race.favoriteOdds.toFixed(1)}
         </span>
 
-        <span className="text-[10.5px] text-white/60">
+        <span className="text-[10.5px] text-white/55">
           {race.starters} partants
         </span>
 
-        <span className="flex items-center gap-1 text-[11px] font-bold text-faso-gold bg-black/25 px-1.5 py-0.5 rounded border border-faso-gold/20">
-          <Clock3 size={11} />
+        <span className="flex items-center gap-1 rounded border border-white/10 bg-black/25 px-1.5 py-0.5 text-[11px] font-semibold text-white/90">
+          <Clock3 size={11} className="text-white/45" />
           {race.time}
           {race.hasResult && (
             <span title="Arrivée validée" className="inline-flex items-center">
-              <CheckCircle2 size={11} className="text-emerald-400 ml-0.5" />
+              <CheckCircle2 size={11} className="ml-0.5 text-emerald-400" />
             </span>
           )}
         </span>

@@ -6,15 +6,17 @@ import type { Race } from "../../data/races";
 interface RaceCarouselProps {
   races: Race[];
   onSelectRace?: (race: Race) => void;
+  /** Transmis aux cartes : affiche la date quand les dates sont mélangées. */
+  showDate?: boolean;
 }
 
-export function RaceCarousel({ races, onSelectRace }: RaceCarouselProps) {
+export function RaceCarousel({ races, onSelectRace, showDate = false }: RaceCarouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   if (!races || races.length === 0) {
     return (
-      <div className="flex h-[134px] w-full items-center justify-center rounded-xl border border-white/10 bg-black/20 text-white/70">
+      <div className="flex h-[132px] w-full items-center justify-center rounded-[8px] border border-white/10 bg-black/20 text-white/60">
         <p className="text-sm">Aucune course enregistrée pour cette sélection.</p>
       </div>
     );
@@ -41,7 +43,7 @@ export function RaceCarousel({ races, onSelectRace }: RaceCarouselProps) {
       <button
         onClick={() => scroll("left")}
         aria-label="Faire défiler vers la gauche"
-        className="absolute -left-2 sm:-left-4 top-1/2 z-20 hidden sm:flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#03241c]/90 border border-faso-gold/30 text-white backdrop-blur-md shadow-lg transition hover:scale-110 hover:bg-faso-green hover:border-faso-gold focus:outline-none"
+        className="absolute -left-2 sm:-left-4 top-1/2 z-20 hidden sm:flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#03241c]/90 border border-white/15 text-white/85 backdrop-blur-md transition-colors hover:bg-faso-green hover:border-faso-green hover:text-white focus:outline-none"
       >
         <ChevronLeft size={18} strokeWidth={2.5} />
       </button>
@@ -61,6 +63,7 @@ export function RaceCarousel({ races, onSelectRace }: RaceCarouselProps) {
               key={`${r.id}-${i}`}
               race={r}
               onSelect={onSelectRace}
+              showDate={showDate}
             />
           ))}
         </div>
@@ -70,7 +73,7 @@ export function RaceCarousel({ races, onSelectRace }: RaceCarouselProps) {
       <button
         onClick={() => scroll("right")}
         aria-label="Faire défiler vers la droite"
-        className="absolute -right-2 sm:-right-4 top-1/2 z-20 hidden sm:flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#03241c]/90 border border-faso-gold/30 text-white backdrop-blur-md shadow-lg transition hover:scale-110 hover:bg-faso-green hover:border-faso-gold focus:outline-none"
+        className="absolute -right-2 sm:-right-4 top-1/2 z-20 hidden sm:flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#03241c]/90 border border-white/15 text-white/85 backdrop-blur-md transition-colors hover:bg-faso-green hover:border-faso-green hover:text-white focus:outline-none"
       >
         <ChevronRight size={18} strokeWidth={2.5} />
       </button>

@@ -7,13 +7,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:css": "node scripts/check_tailwind_classes.mjs",
+    "check:contract": "node scripts/check_dashboard_contract.mjs",
+    "check:render": "node scripts/smoke_render.mjs",
+    "check:api": "python scripts/test_api.py"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "lucide-react": "^1.46.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
@@ -21,6 +26,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.6.0",
+    "jsdom": "^30.0.1",
     "oxlint": "^1.81.0",
     "postcss": "^8.5.28",
     "sharp": "^0.35.4",

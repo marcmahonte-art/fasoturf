@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { X, MapPin, Calendar, Compass, Trophy, TrendingUp, User } from "lucide-react";
+import { X, MapPin, Calendar, Compass, Trophy, TrendingUp, User, Star, CloudSun } from "lucide-react";
 import type { Race } from "../../data/races";
+import { todayIso } from "../../lib/formatters";
 
 const MONTHS_FULL: Record<string, string> = {
   "01": "Janvier", "02": "Février", "03": "Mars", "04": "Avril",
@@ -10,7 +11,8 @@ const MONTHS_FULL: Record<string, string> = {
 
 function formatFullDate(dateStr: string) {
   if (!dateStr) return "Date officielle";
-  const isToday = dateStr === "2026-09-16" || dateStr === new Date().toISOString().split("T")[0];
+  // Comparaison à la date **locale** courante (jamais une constante, jamais l'UTC).
+  const isToday = dateStr.slice(0, 10) === todayIso();
   const parts = dateStr.split("-");
   if (parts.length === 3) {
     const day = parseInt(parts[2], 10);
@@ -67,13 +69,29 @@ export function RaceDetailModal({ race, onClose }: RaceDetailModalProps) {
             <span className="rounded bg-faso-green/20 px-2 py-0.5 text-xs font-bold text-white/90">
               {race.course}
             </span>
-            <span className="rounded-full bg-faso-gold/20 px-2.5 py-0.5 text-xs font-semibold text-faso-gold">
+            <span className="rounded-full border border-white/[0.12] bg-white/[0.08] px-2.5 py-0.5 text-xs font-medium text-white/70">
               {race.discipline}
             </span>
+            {race.isLonab && (
+              <span
+                title={
+                  race.lonabJournalBet
+                    ? `Pari du jour au journal officiel LONAB : ${race.lonabJournalBet}`
+                    : "Course LONAB"
+                }
+                className="flex items-center gap-1 rounded-full border border-faso-gold/45 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-faso-gold/90"
+              >
+                <Star size={12} className="fill-faso-gold/70" />
+                Course LONAB
+                {race.lonabJournalBet ? ` · ${race.lonabJournalBet}` : ""}
+              </span>
+            )}
             {race.hasResult && (
               <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
                 <Trophy size={12} />
-                Arrivée officielle
+                {race.arriveeSource === "lonab"
+                  ? "Arrivée officielle"
+                  : "Résultat de la course"}
               </span>
             )}
           </div>
@@ -82,21 +100,65 @@ export function RaceDetailModal({ race, onClose }: RaceDetailModalProps) {
             {race.title}
           </h2>
 
+          {race.hasResult && race.arrivee && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2">
+              <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                <Trophy size={13} />
+                Arrivée en direct
+              </span>
+              <span className="flex flex-wrap items-center gap-1">
+                {race.arrivee.split("-").map((n, i) => (
+                  <span
+                    key={`${n}-${i}`}
+                    className={`inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 text-xs font-black ${
+                      i === 0
+                        ? "bg-faso-gold text-slate-950"
+                        : "bg-white/15 text-white"
+                    }`}
+                  >
+                    {n}
+                  </span>
+                ))}
+              </span>
+              {race.quinteDividende ? (
+                <span className="ml-auto text-[11px] font-bold text-emerald-300">
+                  Quinté+ : {race.quinteDividende.toLocaleString("fr-FR")} € / 1 €
+                </span>
+              ) : race.arriveeSource === "positions" ? (
+                <span className="ml-auto text-[10px] font-medium uppercase tracking-wider text-white/45">
+                  d'après les positions au poteau
+                </span>
+              ) : null}
+            </div>
+          )}
+
           <div className="mt-3 flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* DATE ULTRA VISIBLE */}
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400/25 border border-amber-400/60 px-3 py-1 text-xs sm:text-sm font-black text-amber-300 shadow-md">
-              <Calendar size={15} className="text-amber-400" />
+            {/* Date de la course */}
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.08] px-3 py-1 text-xs font-semibold text-white/90 sm:text-sm">
+              <Calendar size={15} className="text-faso-accent" />
               {formatFullDate(race.date)} · {race.time}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1 text-xs sm:text-sm font-semibold text-white/95">
-              <MapPin size={14} className="text-faso-gold" />
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.08] px-3 py-1 text-xs font-medium text-white/85 sm:text-sm">
+              <MapPin size={14} className="text-white/45" />
               {race.hippodrome}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1 text-xs sm:text-sm font-semibold text-white/80">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.08] px-3 py-1 text-xs font-medium text-white/70 sm:text-sm">
               <Compass size={14} />
-              {race.distance} ({race.terrain})
+              {race.distance}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs sm:text-sm font-bold text-emerald-400">
+            {race.meteo && (
+              <span
+                title={
+                  `Météo réunion${race.meteo.ventForce != null ? ` · vent ${race.meteo.ventForce} km/h ${race.meteo.ventDirection ?? ""}` : ""}`
+                }
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.08] px-3 py-1 text-xs font-medium text-white/70 sm:text-sm"
+              >
+                <CloudSun size={14} className="text-white/45" />
+                {race.meteo.temperature != null ? `${race.meteo.temperature}°` : ""}
+                {race.meteo.nebulosite ? ` ${race.meteo.nebulosite}` : ""}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300 sm:text-sm">
               <TrendingUp size={14} />
               Favori : {race.favoriteOdds.toFixed(1)}/1
             </span>
@@ -141,7 +203,7 @@ export function RaceDetailModal({ race, onClose }: RaceDetailModalProps) {
                         </span>
                       )}
                       {runner.marketRank === 1 && !runner.isWinner && (
-                        <span className="rounded bg-faso-gold/20 px-1.5 py-0.5 text-[10px] font-bold text-faso-gold">
+                        <span className="rounded border border-white/[0.12] bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-semibold text-white/65">
                           Favori
                         </span>
                       )}

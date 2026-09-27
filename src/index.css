@@ -7,6 +7,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   FasoTurf — Design tokens (cf. Design System v1.0 §36)
+   Les tokens sont aussi exposés en variables CSS pour les usages
+   inline (dégradés, SVG) qui ne passent pas par Tailwind.
+------------------------------------------------------------------ */
+:root {
+  --ft-green: #087f3e;
+  --ft-green-dark: #05632f;
+  --ft-green-deep: #003d2a;
+  --ft-accent: #0baf58;
+
+  --ft-gold: #f2c94c;
+  --ft-red: #d64545;
+
+  --ft-bg: #f7f9f8;
+  --ft-white: #ffffff;
+
+  --ft-text: #17221c;
+  --ft-muted: #68736d;
+  --ft-border: #dce3df;
+
+  --ft-sidebar: #001c18;
+
+  --ft-radius-sm: 6px;
+  --ft-radius-md: 8px;
+  --ft-radius-lg: 12px;
+  --ft-radius-xl: 16px;
+
+  --ft-shadow-sm: 0 1px 3px rgba(23, 34, 28, 0.06);
+  --ft-shadow-md: 0 4px 12px rgba(23, 34, 28, 0.08);
+}
+
 html,
 body,
 #root {
@@ -19,5 +51,82 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  color: #17221C;
+  color: #17221c;
+}
+
+/* ------------------------------------------------------------------
+   Surfaces sombres : couleur de texte claire par défaut.
+   `body` impose #17221c ; sans cette règle, tout texte posé sur une
+   surface sombre SANS classe de couleur explicite hérite du noir et
+   devient invisible (fond sidebar #001c18 → contraste ~1,05:1).
+   Déclarée dans `@layer base` pour rester surchargeable par n'importe
+   quelle classe `text-*`, qui vit dans la couche `utilities`.
+------------------------------------------------------------------ */
+@layer base {
+  .ft-on-dark {
+    color: #ffffff;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Accessibilité : focus visible homogène sur toute l'application
+------------------------------------------------------------------ */
+:focus-visible {
+  outline: 2px solid #087f3e;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Sur les surfaces sombres (sidebar, hero), l'anneau vert est illisible */
+.ft-on-dark :focus-visible {
+  outline-color: #0baf58;
+}
+
+/* ------------------------------------------------------------------
+   Barre de défilement discrète (sidebar et zones scrollables)
+------------------------------------------------------------------ */
+.ft-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+
+.ft-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ft-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ft-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.ft-scroll-light {
+  scrollbar-width: thin;
+  scrollbar-color: #dce3df transparent;
+}
+
+.ft-scroll-light::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ft-scroll-light::-webkit-scrollbar-thumb {
+  background: #dce3df;
+  border-radius: 999px;
+}
+
+/* ------------------------------------------------------------------
+   Animations : toujours discrètes (spec §56)
+------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

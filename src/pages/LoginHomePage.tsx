@@ -5,31 +5,43 @@ import { HeroContent } from "../components/landing/HeroContent";
 import { LoginCard } from "../components/landing/LoginCard";
 import { LatestRaces } from "../components/landing/LatestRaces";
 import { RaceDetailModal } from "../components/landing/RaceDetailModal";
-import { races as defaultRaces, type Race } from "../data/races";
-import { fetchRaces, fetchDates, type DateItem } from "../services/api";
+import type { Race } from "../data/races";
+import {
+  fetchRaces,
+  fetchDates,
+  type DateItem,
+  type RaceFeedSource,
+} from "../services/api";
 
+/**
+ * Page publique `/` — présentation + connexion, avec le programme réel.
+ *
+ * Le programme n'est **jamais** pré-rempli par un fichier local : il démarre
+ * vide et n'affiche que ce que l'API renvoie. Si l'API est injoignable, la
+ * bande du bas le dit explicitement et affiche l'instantané local avec sa date
+ * de capture — un repli déclaré, pas un repli silencieux.
+ */
 export function LoginHomePage() {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null);
-  const [racesList, setRacesList] = useState<Race[]>(defaultRaces);
+  const [racesList, setRacesList] = useState<Race[]>([]);
   const [availableDates, setAvailableDates] = useState<DateItem[]>([]);
   const [isLive, setIsLive] = useState<boolean>(false);
+  const [source, setSource] = useState<RaceFeedSource | null>(null);
+  const [snapshotDate, setSnapshotDate] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    // Récupérer les courses (les plus récentes en premier, dont aujourd'hui)
     fetchRaces(50).then((result) => {
-      if (mounted && result.races.length > 0) {
-        setRacesList(result.races);
-        setIsLive(result.isLive);
-      }
+      if (!mounted) return;
+      setRacesList(result.races);
+      setIsLive(result.isLive);
+      setSource(result.source);
+      setSnapshotDate(result.snapshotDate);
     });
 
-    // Récupérer les dates disponibles
     fetchDates().then((dates) => {
-      if (mounted && dates.length > 0) {
-        setAvailableDates(dates);
-      }
+      if (mounted) setAvailableDates(dates);
     });
 
     return () => {
@@ -59,19 +71,18 @@ export function LoginHomePage() {
         </div>
       </main>
 
-      {/* Bandeau Programme officiel & Arrivées en direct */}
+      {/* Bandeau Programme officiel & Arrivées */}
       <LatestRaces
         races={racesList}
         isLive={isLive}
+        source={source}
+        snapshotDate={snapshotDate}
         availableDates={availableDates}
         onSelectRace={(race) => setSelectedRace(race)}
       />
 
       {/* Modale détaillée de la course et des partants */}
-      <RaceDetailModal
-        race={selectedRace}
-        onClose={() => setSelectedRace(null)}
-      />
+      <RaceDetailModal race={selectedRace} onClose={() => setSelectedRace(null)} />
     </div>
   );
 }
